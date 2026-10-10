@@ -23,7 +23,7 @@ select product_name from Products where product_name like 's%';
 #7.
 select city, count(customer_name) as customer_count from Customers group by city;
 #8.
-select store_id, round(avg(salary)) as avg_salary from Employees group by store_id;
+select store_id, round(avg(salary)) as avg_salary from Employees group by store_id avg(salary) order by desc;
 #9.
 select c.category_name, count(*) as product_count
 from Categories c
