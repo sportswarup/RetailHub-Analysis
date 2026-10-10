@@ -15,11 +15,11 @@ select * from Customers where city = 'MUMBAI';
 #3.
 select employee_id, employee_name, hire_date from Employees where hire_date > '2024-01-01';
 #4.
-select product_id, product_name, price from Products where price between 500 and 2000 order by price asc;
+select product_name, price from Products where price between 500 and 2000 order by price asc;
 #5.
 select distinct city from Customers;
 #6.
-select * from Products where product_name like 's%';
+select product_name from Products where product_name like 's%';
 #7.
 select city, count(customer_name) as customer_count from Customers group by city;
 #8.
