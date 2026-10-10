@@ -13,7 +13,7 @@ select product_name, price from Products order by price desc;
 #2.
 select * from Customers where city = 'MUMBAI';
 #3.
-select employee_id, employee_name, hire_date from Employees where hire_date > 2024-01-01;
+select employee_id, employee_name, hire_date from Employees where hire_date > '2024-01-01';
 #4.
 select product_id, product_name, price from Products where price between 500 and 2000 order by price asc;
 #5.
