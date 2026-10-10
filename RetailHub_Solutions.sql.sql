@@ -30,32 +30,37 @@ from Categories c
 join Products p
 on c.category_id = p.category_id
 group by c.category_name
-having count(*) > 100;
+having count(*) > 100
+order by count(*) desc;
 #10.
-select product_id, quantity, sum(sales_amount) from OrderDetails group by product_id, quantity;
+select product_id, quantity, sum(sales_amount) as total_sales
+from OrderDetails group by product_id, quantity
+order by sum(sales_amount) desc;
 #11.
-select store_id, avg(salary) over() from Employees where salary > 60000 group by store_id;
-
+select store_id, round(avg(salary)) as average_salary 
+from Employees group by store_id 
+having avg(salary) > 60000 
+order by average_salary desc;
 #12.
-select city, count(*) from Customers group by city having count(city) > 5;
+select city, count(*) as city_count 
+from Customers group by city 
+having count(city) > 5 
+order by city_count desc;
 #13.
-select c.customer_name, c.customer_id, o.order_id, p.product_name from Customers c 
+select o.order_id, c.customer_name, o.order_date from Customers c 
 join Orders o on c.customer_id = o.customer_id
-join OrderDetails d on o.order_id = d.order_id
-join Products p on d.product_id = p.product_id
-group by c.customer_name, c.customer_id, o.order_id, p.product_name ;
+order by order_id asc;
 #14.
-select c.category_name, p.product_name, c.category_id, p.product_id from Categories c 
+select c.category_name, p.product_name from Categories c 
 join Products p on c.category_id = p.category_id;
 #15.
 select e.employee_name, s.store_name from Employees e 
-join Stores s on e.store_id = s.store_id
-group by e.employee_name, s.store_name ;
+join Stores s on e.store_id = s.store_id;
 #16.
 select p.product_name, d.* from OrderDetails d
 join Products p on d.product_id = p.product_id;
 #17.
-select e.employee_name, c.customer_name, o.order_date from Customers c
+select e.employee_name, c.customer_name, o.order_id from Customers c
 join Orders o on c.customer_id = o.customer_id
 join Employees e on o.employee_id = e.employee_id;
 #18.
@@ -66,24 +71,27 @@ group by s.store_name;
 select p.product_id, p.product_name from Products p
 left join OrderDetails d on p.product_id = d.product_id
 where d.order_id is null;
-             #or
-select * from Products where product_id not in (select product_id from OrderDetails);
 #20
-select distinct c.customer_id, c.customer_name from Customers c 
+select distinct c.customer_name from Customers c 
 join Orders o on c.customer_id = o.customer_id;
 #21.
-select * from Products where price > (select avg(price) from Products);
+select product_name, price from Products where price > (select avg(price) from Products) order by price asc;
 #22.
-select * from Employees where salary >( select avg(salary) from Employees);
+select employee_name, salary from Employees where salary >( select avg(salary) from Employees) order by salary asc;
 #23.
 select distinct c.* from Customers c
 join Stores s on c.city = s.city;
 #24.
 select * from OrderDetails where sales_amount > ( select avg(sales_amount) from OrderDetails);
 #25.
-select p.category_id, c.category_name, max(price) from Products p 
-join Categories c on p.category_id = c.category_id
-group by category_id;
+select c.category_name, p.product_name, p.price
+from Products p join Categories c
+on p.category_id = c.category_id
+where p.price = (
+    select max(p2.price)
+    from Products p2
+    where p2.category_id = p.category_id)
+order by c.category_name;
 #26.
 select o.customer_id, c.customer_name, count(o.order_id) as max_order_count from Orders o join OrderDetails d 
 on o.order_id = d.order_id 
