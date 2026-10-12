@@ -98,15 +98,20 @@ on o.order_id = d.order_id
 join Customers c 
 on o.customer_id = c.customer_id 
 group by o.customer_id, c.customer_name
-having count(o.order_id) > (select avg(quantity) from OrderDetails);
+having count(o.order_id) > (select avg(quantity) from OrderDetails)
+order by max_order_count desc;
 #27.
 select employee_id, employee_name, max(salary) as max_salary from Employees 
 where salary > (select avg(salary) from Employees) group by employee_id, employee_name;
 #28.
-select c.category_name, sum(price) from Products p join Categories c
+select c.category_name, sum(d.quantity * d.sales_amount) as category_total_sales from OrderDetails as d
+join Products p
+on p.product_id = d.product_id
+join Categories c 
 on p.category_id = c.category_id
-group by c.category_name
-having sum(price) > 100000;
+group by c.category_name, c.category_id
+having sum(d.quantity * d.sales_amount) > 100000
+order by category_total_sales desc;
 #29.
 with customer_sales as
 (	select o.customer_id, sum(od.quantity * od.sales_amount) as total_sales
