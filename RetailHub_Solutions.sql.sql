@@ -104,14 +104,20 @@ order by max_order_count desc;
 select employee_id, employee_name, max(salary) as max_salary from Employees 
 where salary > (select avg(salary) from Employees) group by employee_id, employee_name;
 #28.
-select c.category_name, sum(d.quantity * d.sales_amount) as category_total_sales from OrderDetails as d
-join Products p
-on p.product_id = d.product_id
-join Categories c 
-on p.category_id = c.category_id
-group by c.category_name, c.category_id
-having sum(d.quantity * d.sales_amount) > 100000
-order by category_total_sales desc;
+with Category_sales as
+(	select c.category_id, c.category_name, sum(od.quantity * od.sales_amount) as total_sales
+	from OrderDetails od 
+	join Products p 
+    on od.product_id = p.product_id
+    join Categories c
+    on p.category_id = c.category_id
+    group by c.category_id, c.category_name
+)
+
+select category_name, total_sales
+from Category_sales
+where total_sales > 100000
+order by total_sales desc;
 #29.
 with customer_sales as
 (	select o.customer_id, sum(od.quantity * od.sales_amount) as total_sales
@@ -144,14 +150,14 @@ limit 5;
 #31.
 with monthly_sales as
 (
-    select date_format(o.order_date,'%Y-%m') as month, sum(od.quantity * od.sales_amount) as total_sales
+    select date_format(o.order_date,'%Y-%m') as months, sum(od.quantity * od.sales_amount) as total_sales
     from Orders o
     join OrderDetails od
     on o.order_id = od.order_id
     group by date_format(o.order_date,'%Y-%m')
 )
 
-select * from monthly_sales order by month;
+select * from monthly_sales order by months;
 #32.
 
 #33.
