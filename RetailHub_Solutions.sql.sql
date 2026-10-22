@@ -161,22 +161,26 @@ select * from monthly_sales order by months;
 #32.
 
 #33.
-select s.store_id, s.store_name, sum(sales_amount) as max_sales, avg(sales_amount) as avg_sales from OrderDetails d join Orders o 
+select s.store_id, s.store_name, 
+sum(sales_amount) as max_sales, avg(sales_amount) as avg_sales 
+from OrderDetails d 
+join Orders o 
 on d.order_id = o.order_id
 join Employees e
 on o.employee_id = e.employee_id
 join Stores s
 on e.store_id = s.store_id
 group by s.store_id, s.store_name
-having sum(sales_amount) > avg(sales_amount);
+having sum(sales_amount) > avg(sales_amount)
+order by max_sales desc;
 #34
 with recursive numbers as
 (
-    select 1 as number
+    select 1 as number           # Anchor Query
 
     union all
 
-    select number + 1
+    select number + 1            # Recursive Query
     from numbers
     where number < 12
 )
@@ -186,29 +190,45 @@ select * from numbers;
 with monthly_sales as
 (
     select
-        date_format(o.order_date,'%Y-%m') as month,
-        sum(od.quantity * od.unit_price) as sales
+        date_format(o.order_date,'%Y-%m') as months,
+        sum(od.quantity * od.sales_amount) as sales
     from Orders o
-    join Orderdetails od
+    join OrderDetails od
     on o.order_id = od.order_id
     group by date_format(o.order_date,'%Y-%m')
 )
 
-select month, sales, sum(sales) over(order by month) as running_sales
+select months, sales, 
+sum(sales) over(order by months) as running_sales
 from monthly_sales;
 #36.
-select *, rank() over(order by salary desc) as emp_rank from Employees;
+select *, dense_rank() over(order by salary desc) as emp_rank from Employees;
 #37.
 select store_id, employee_id, employee_name, salary from
-(select store_id, employee_id, employee_name, salary, row_number()
-over( partition by store_id order by salary desc) as salary_rank from Employees) as ranked
+(
+	select store_id, employee_id, employee_name, salary,
+	dense_rank() over(partition by store_id order by salary desc) 
+	as salary_rank from Employees
+) as ranked
 where salary_rank <= 3 order by store_id, salary desc;
 #38.
-SELECT o.customer_id, o.order_date, o.order_id, d.sales_amount, sum(d.sales_amount) 
-over(partition by o.customer_id order by o.order_date, o.order_id) as cumulative_sales
-from Orders o join OrderDetails d 
-on o.order_id = d.order_id
-order by o.customer_id, o.order_date, o.order_id;
+with cummulative_sales as (
+	select c.customer_id, od.sales_amount, o.order_date, sum(od.quantity * od.sales_amount) as daily_sales 
+    from Customers c
+	join Orders o
+	on c.customer_id = o.customer_id
+	join OrderDetails od
+	on o.order_id = od.order_id
+	group by c.customer_id, od.sales_amount, o.order_date
+)
+select customer_id, order_date, daily_sales,
+sum(daily_sales) 
+over (
+		partition by customer_id order by order_date 
+		ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+	 ) as running_sales 
+from cummulative_sales
+order by customer_id, order_date
 #39.
 select customer_id, order_id, order_date,
 lag(order_date) over (partition by customer_id order by order_date) as previous_order_date
